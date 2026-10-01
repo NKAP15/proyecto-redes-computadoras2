@@ -1,0 +1,569 @@
+EDIFICIO 1
+----------
+enable 
+configure terminal
+hostname Edificio1
+interface se0/0/0
+ip address 10.0.0.1 255.255.255.252
+no sh
+interface se0/0/1 
+ip address 10.0.0.13 255.255.255.252
+no sh
+interface se0/1/0
+ip address 10.0.0.17 255.255.255.252
+no sh
+interface fa0/0
+no sh
+interface fa0/0.10
+encapsulation dot1Q 10
+ip address 192.168.10.1 255.255.255.0
+no sh
+interface fa0/0.110
+encapsulation dot1Q 110
+ip address 192.168.110.1 255.255.255.0
+no sh
+interface fa0/1
+no sh
+interface fa0/1.20
+encapsulation dot1Q 20
+ip address 192.168.20.1 255.255.255.0
+no sh
+interface fa0/1.120
+encapsulation dot1Q 120
+ip address 192.168.120.1 255.255.255.0
+no sh
+
+ip dhcp pool datos1
+network 192.168.10.0 255.255.255.0
+default-router 192.168.10.1 
+dns-server 192.168.100.2
+ip dhcp excluded-address 192.168.10.1 192.168.10.10
+ip dhcp pool voz1
+network 192.168.110.0 255.255.255.0
+default-router 192.168.110.1
+option 150 ip 192.168.110.1
+ip dhcp excluded-address 192.168.110.1 192.168.110.10
+
+ip dhcp pool datos2
+network 192.168.20.0 255.255.255.0
+default-router 192.168.20.1 
+dns-server 192.168.100.2
+ip dhcp excluded-address 192.168.20.1 192.168.20.10
+ip dhcp pool voz2
+network 192.168.120.0 255.255.255.0
+default-router 192.168.120.1
+option 150 ip 192.168.120.1
+ip dhcp excluded-address 192.168.120.1 192.168.120.10
+
+router ospf 1
+router-id 1.1.1.1
+network 10.0.0.0 0.0.0.3 area 0
+network 10.0.0.16 0.0.0.3 area 0
+network 192.168.10.0 0.0.0.255 area 0
+network 192.168.110.0 0.0.0.255 area 0
+network 192.168.20.0 0.0.0.255 area 0
+network 192.168.120.0 0.0.0.255 area 0
+network 200.0.0.0 0.0.0.3 area 0
+redistribute eigrp 10 subnets
+
+router eigrp 10 
+network 10.0.0.12 0.0.0.3 
+network 192.168.10.0 0.0.0.255 
+network 192.168.110.0 0.0.0.255
+network 192.168.20.0 0.0.0.255 
+network 192.168.120.0 0.0.0.255 
+no auto-summary
+redistribute ospf 1 metric 10000 100 255 1 1500
+
+
+telephony-service
+max-ephones 20
+max-dn 20
+ip source-address 192.168.110.1 port 2000
+auto assign 1 to 20
+ephone-dn 1
+number 101
+ephone-dn 2
+number 201
+ephone-dn 3
+number 102
+ephone-dn 4
+number 202
+ephone-dn 5
+number 103
+ephone-dn 6
+number 203
+
+dial-peer voice 300 voip
+destination-pattern 3..
+session target ipv4:172.16.110.1
+dial-peer voice 400 voip
+destination-pattern 4..
+session target ipv4:172.16.110.1
+dial-peer voice 500 voip
+destination-pattern 5..
+session target ipv4:192.168.130.1
+dial-peer voice 600 voip
+destination-pattern 6..
+session target ipv4:192.168.130.1
+dial-peer voice 700 voip
+destination-pattern 7..
+session target ipv4:172.16.130.1
+dial-peer voice 800 voip
+destination-pattern 8..
+session target ipv4:172.16.130.1
+
+access-list 101 remark Bloqueo entre Oficina 2 y Oficina 6 
+access-list 101 deny ip 192.168.20.0 0.0.0.255 192.168.40.0 0.0.0.255
+access-list 101 deny ip 192.168.40.0 0.0.0.255 192.168.20.0 0.0.0.255
+access-list 101 permit ip any any
+interface fa0/1.20
+ip access-group 101 out
+
+access-list 103 remark Bloqueo Oficina1 y Oficina3
+access-list 103 deny ip 192.168.10.0 0.0.0.255 172.16.10.0 0.0.0.255
+access-list 103 deny ip 172.16.10.0 0.0.0.255 192.168.10.0 0.0.0.255
+access-list 103 permit ip any any
+interface fa0/0.10
+ip access-group 103 out
+
+banner login #
+*******************************
+*   ACCESO SOLO AUTORIZADO    *
+*  DISPOSITIVO CON SEGURIDAD  *
+*******************************
+#
+aaa new-model
+username admin secret 123
+
+tacacs-server host 192.168.20.2 key AAA1
+
+aaa authentication login default group tacacs+ local
+aaa authorization exec default group tacacs+ local
+
+line console 0
+login authentication default
+line vty 0 4
+login authentication default
+transport input telnet 
+
+EDIFICIO 2
+----------
+enable 
+configure terminal
+hostname Edificio2
+interface se0/0/0
+ip address 10.0.0.2 255.255.255.252
+no sh
+interface se0/0/1 
+ip address 10.0.0.5 255.255.255.252
+no sh
+interface fa0/0
+no sh
+interface fa0/0.10
+encapsulation dot1Q 10
+ip address 172.16.10.1 255.255.255.0
+no sh
+interface fa0/0.110
+encapsulation dot1Q 110
+ip address 172.16.110.1 255.255.255.0
+no sh
+interface fa0/1
+no sh
+interface fa0/1.20
+encapsulation dot1Q 20
+ip address 172.16.20.1 255.255.255.0
+no sh
+interface fa0/1.120
+encapsulation dot1Q 120
+ip address 172.16.120.1 255.255.255.0
+no sh
+interface fa1/0
+ip address 200.0.0.1 255.255.255.252
+no sh
+
+ip dhcp pool datos1
+network 172.16.10.0 255.255.255.0
+default-router 172.16.10.1
+dns-server 192.168.100.2
+ip dhcp excluded-address 172.16.10.1 172.16.10.10
+ip dhcp pool voz1
+network 172.16.110.0 255.255.255.0
+default-router 172.16.110.1
+option 150 ip 172.16.110.1
+ip dhcp excluded-address 172.16.110.1 172.16.110.10
+
+ip dhcp pool datos2
+network 172.16.20.0 255.255.255.0
+default-router 172.16.20.1
+dns-server 192.168.100.2
+ip dhcp excluded-address 172.16.20.1 172.16.20.10
+ip dhcp pool voz2
+network 172.16.120.0 255.255.255.0
+default-router 172.16.120.1
+option 150 ip 172.16.120.1
+ip dhcp excluded-address 172.16.120.1 172.16.120.10
+
+router rip
+version 2
+no auto-summary
+network 10.0.0.4
+network 172.16.10.0
+network 172.16.20.0
+network 172.16.110.0
+network 172.16.120.0
+redistribute ospf 1 metric 2
+
+router ospf 1
+router-id 2.2.2.2
+network 10.0.0.0 0.0.0.3 area 0
+network 172.16.10.0 0.0.0.255 area 0
+network 172.16.20.0 0.0.0.255 area 0
+network 172.16.110.0 0.0.0.255 area 0
+network 172.16.120.0 0.0.0.255 area 0
+redistribute rip subnets
+
+
+telephony-service
+max-ephones 20
+max-dn 20
+ip source-address 172.16.110.1 port 2000
+auto assign 1 to 20
+ephone-dn 1
+number 301
+ephone-dn 2
+number 401
+ephone-dn 3
+number 302
+ephone-dn 4
+number 402
+ephone-dn 5
+number 303
+ephone-dn 6
+number 403
+
+dial-peer voice 110 voip
+destination-pattern 1..
+session target ipv4:192.168.110.1
+dial-peer voice 210 voip
+destination-pattern 2..
+session target ipv4:192.168.110.1
+dial-peer voice 600 voip
+destination-pattern 6..
+session target ipv4:192.168.130.1
+dial-peer voice 500 voip
+destination-pattern 5..
+session target ipv4:192.168.130.1
+dial-peer voice 700 voip
+destination-pattern 7..
+session target ipv4:172.16.130.1
+dial-peer voice 800 voip
+destination-pattern 8..
+session target ipv4:172.16.130.1
+
+access-list 102 remark Bloqueo Oficina4 y Oficina7 
+access-list 102 deny ip 172.16.20.0 0.0.0.255 172.16.30.0 0.0.0.255
+access-list 102 deny ip 172.16.30.0 0.0.0.255 172.16.20.0 0.0.0.255
+access-list 102 permit ip any any
+interface fa0/1.20
+ip access-group 102 out
+
+banner login #
+*******************************
+*   ACCESO SOLO AUTORIZADO    *
+*DISPOSITIVO CON SEGURIDAD    *
+*******************************
+#
+aaa new-model
+username admin secret 123
+
+tacacs-server host 192.168.20.2 key AAA1
+radius-server host 192.168.100.5 key AAA2
+
+aaa authentication login default group tacacs+ group radius local
+aaa authorization exec default group tacacs+ group radius local
+
+line console 0
+login authentication default
+line vty 0 4
+login authentication default
+transport input telnet 
+
+EDIFICIO 3
+----------
+enable 
+configure terminal
+hostname Edificio3
+interface se0/0/0
+ip address 10.0.0.9 255.255.255.252
+no sh
+interface se0/0/1 
+ip address 10.0.0.6 255.255.255.252
+no sh
+interface se0/1/0
+ip address 10.0.0.18 255.255.255.252
+no sh
+interface fa0/0
+no sh
+interface fa0/0.30
+encapsulation dot1Q 30
+ip address 192.168.30.1 255.255.255.0
+no sh
+interface fa0/0.130
+encapsulation dot1Q 130
+ip address 192.168.130.1 255.255.255.0
+no sh
+interface fa0/1
+no sh
+interface fa0/1.40
+encapsulation dot1Q 40
+ip address 192.168.40.1 255.255.255.0
+no sh
+interface fa0/1.140
+encapsulation dot1Q 140
+ip address 192.168.140.1 255.255.255.0
+no sh
+
+ip dhcp pool datos1
+network 192.168.30.0 255.255.255.0
+default-router 192.168.30.1 
+dns-server 192.168.100.2
+ip dhcp excluded-address 192.168.30.1 192.168.30.10
+ip dhcp pool voz1
+network 192.168.130.0 255.255.255.0
+default-router 192.168.130.1
+option 150 ip 192.168.130.1
+ip dhcp excluded-address 192.168.130.1 192.168.130.10
+
+ip dhcp pool datos2
+network 192.168.40.0 255.255.255.0
+default-router 192.168.40.1 
+dns-server 192.168.100.2
+ip dhcp excluded-address 192.168.40.1 192.168.40.10
+ip dhcp pool voz2
+network 192.168.140.0 255.255.255.0
+default-router 192.168.140.1
+option 150 ip 192.168.140.1
+ip dhcp excluded-address 192.168.140.1 192.168.140.10
+
+router rip
+version 2
+no auto-summary
+network 10.0.0.4
+network 192.168.30.0
+network 192.168.40.0
+network 192.168.130.0
+network 192.168.140.0
+redistribute ospf 1 metric 2
+
+router ospf 1
+router-id 3.3.3.3
+network 10.0.0.16 0.0.0.3 area 0
+network 10.0.0.8 0.0.0.3 area 0
+network 192.168.30.0 0.0.0.255 area 0
+network 192.168.40.0 0.0.0.255 area 0
+network 192.168.130.0 0.0.0.255 area 0
+network 192.168.140.0 0.0.0.255 area 0
+redistribute rip subnets
+redistribute bgp 300 subnets
+
+router bgp 300
+neighbor 10.0.0.10 remote-as 400
+network 10.0.0.8 mask 255.255.255.252
+network 192.168.30.0 mask 255.255.255.0
+network 192.168.40.0 mask 255.255.255.0
+network 192.168.130.0 mask 255.255.255.0
+network 192.168.140.0 mask 255.255.255.0
+redistribute ospf 1
+
+telephony-service
+max-ephones 20
+max-dn 20
+ip source-address 192.168.130.1 port 2000
+auto assign 1 to 20
+ephone-dn 1
+number 501
+ephone-dn 2
+number 601
+ephone-dn 3
+number 502
+ephone-dn 4
+number 602
+ephone-dn 5
+number 503
+ephone-dn 6
+number 603
+
+dial-peer voice 400 voip
+destination-pattern 4..
+session target ipv4:172.16.110.1
+dial-peer voice 300 voip
+destination-pattern 3..
+session target ipv4:172.16.110.1
+dial-peer voice 100 voip
+destination-pattern 1..
+session target ipv4:192.168.110.1
+dial-peer voice 200 voip
+destination-pattern 2..
+session target ipv4:192.168.110.1
+dial-peer voice 700 voip
+destination-pattern 7..
+session target ipv4:172.16.130.1
+dial-peer voice 800 voip
+destination-pattern 8..
+session target ipv4:172.16.130.1
+
+banner login #
+*******************************
+*   ACCESO SOLO AUTORIZADO    *
+*DISPOSITIVO CON SEGURIDAD    *
+*******************************
+#
+aaa new-model
+username admin secret 123
+tacacs-server host 192.168.20.2 key AAA1
+aaa authentication login default group tacacs+ local
+aaa authorization exec default group tacacs+ local
+line console 0
+login authentication default
+line vty 0 4
+login authentication default
+transport input telnet 
+
+
+
+EDIFICIO 4
+----------
+enable 
+configure terminal
+hostname Edificio4
+interface se0/0/0
+ip address 10.0.0.10 255.255.255.252
+no sh
+interface se0/0/1 
+ip address 10.0.0.14 255.255.255.252
+no sh
+interface fa0/0
+no sh
+interface fa0/0.30
+encapsulation dot1Q 30
+ip address 172.16.30.1 255.255.255.0
+no sh
+interface fa0/0.130
+encapsulation dot1Q 130
+ip address 172.16.130.1 255.255.255.0
+no sh
+
+interface fa0/1
+no sh
+interface fa0/1.40
+encapsulation dot1Q 40
+ip address 172.16.40.1 255.255.255.0
+no sh
+interface fa0/1.140
+encapsulation dot1Q 140
+ip address 172.16.140.1 255.255.255.0
+no sh
+
+ip dhcp pool datos1
+network 172.16.30.0 255.255.255.0
+default-router 172.16.30.1
+dns-server 192.168.100.2
+ip dhcp excluded-address 172.16.30.1 172.16.30.10
+ip dhcp pool voz1
+network 172.16.130.0 255.255.255.0
+default-router 172.16.130.1
+option 150 ip 172.16.130.1
+ip dhcp excluded-address 172.16.130.1 172.16.130.10
+
+ip dhcp pool datos2
+network 172.16.40.0 255.255.255.0
+default-router 172.16.40.1
+dns-server 192.168.100.2
+ip dhcp excluded-address 172.16.40.1 172.16.40.10
+ip dhcp pool voz2
+network 172.16.140.0 255.255.255.0
+default-router 172.16.140.1
+option 150 ip 172.16.140.1 
+ip dhcp excluded-address 172.16.140.1 172.16.140.10
+
+router bgp 400
+neighbor 10.0.0.9 remote-as 300
+network 10.0.0.8 mask 255.255.255.252
+network 172.16.30.0 mask 255.255.255.0
+network 172.16.40.0 mask 255.255.255.0
+network 172.16.130.0 mask 255.255.255.0
+network 172.16.140.0 mask 255.255.255.0
+redistribute eigrp 10
+
+router eigrp 10
+network 10.0.0.12 0.0.0.3
+network 172.16.30.0 0.0.0.255
+network 172.16.40.0 0.0.0.255
+network 172.16.130.0 0.0.0.255
+network 172.16.140.0 0.0.0.255
+no auto-summary
+redistribute bgp 400 metric 10000 100 255 1 1500
+
+
+telephony-service
+max-ephones 20
+max-dn 20
+ip source-address 172.16.130.1 port 2000
+auto assign 1 to 20
+ephone-dn 1
+number 701
+ephone-dn 2
+number 801
+ephone-dn 3
+number 702
+ephone-dn 4
+number 802
+ephone-dn 5
+number 703
+ephone-dn 6
+number 803
+
+dial-peer voice 600 voip
+destination-pattern 6..
+session target ipv4:192.168.130.1
+dial-peer voice 500 voip
+destination-pattern 5..
+session target ipv4:192.168.130.1
+dial-peer voice 400 voip
+destination-pattern 4..
+session target ipv4:172.16.110.1
+dial-peer voice 300 voip
+destination-pattern 3..
+session target ipv4:172.16.110.1
+dial-peer voice 100 voip
+destination-pattern 1..
+session target ipv4:192.168.110.1
+dial-peer voice 200 voip
+destination-pattern 2..
+session target ipv4:192.168.110.1
+
+access-list 104 remark Bloqueo Oficina8 y Oficina5
+access-list 104 deny ip 172.16.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+access-list 104 deny ip 192.168.30.0 0.0.0.255 172.16.40.0 0.0.0.255
+access-list 104 permit ip any any
+interface fa0/1.40
+ip access-group 104 out
+
+banner login #
+*******************************
+*   ACCESO SOLO AUTORIZADO    *
+*DISPOSITIVO CON SEGURIDAD    *
+*******************************
+#
+aaa new-model
+username admin secret 123
+tacacs-server host 192.168.20.2 key AAA1
+aaa authentication login default group tacacs+ local
+aaa authorization exec default group tacacs+ local
+line console 0
+login authentication default
+line vty 0 4
+login authentication default
+transport input telnet 
+

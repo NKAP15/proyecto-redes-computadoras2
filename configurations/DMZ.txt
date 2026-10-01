@@ -1,0 +1,156 @@
+SISTEMAS
+----------------
+enable
+configure terminal
+hostname SISTEMAS
+interface fa0/0
+ip address 192.168.100.1 255.255.255.0
+no sh
+interface fa0/1
+ip address 200.0.0.9 255.255.255.252
+no sh
+interface s0/0/1
+ip address 10.0.0.1 255.255.255.252
+no sh
+router eigrp 10
+network 192.168.100.0 0.0.0.255
+network 10.0.0.0 0.0.0.3
+no auto-summary
+redistribute ospf 1 metric 10000 100 255 1 1500
+router ospf 1
+router-id 1.1.1.1
+network 200.0.0.8 0.0.0.3 area 0
+redistribute eigrp 10 subnets
+
+VENTAS
+----------------
+enable
+configure terminal
+hostname VENTAS
+interface s0/0/1
+ip address 10.0.0.2 255.255.255.252
+no sh
+interface s0/1/0
+ip address 10.0.0.5 255.255.255.252
+bandwidth 2000
+delay 10
+no sh
+interface s0/1/1
+ip address 10.0.0.9 255.255.255.252
+no sh
+router eigrp 10
+network 10.0.0.0 0.0.0.3
+network 10.0.0.4 0.0.0.3
+network 10.0.0.8 0.0.0.3
+no auto-summary
+
+CREDITO
+----------------
+enable
+configure terminal
+hostname CREDITO
+interface fa0/0
+ip address 128.168.10.1 255.255.255.0
+no sh
+interface s0/1/0
+ip address 10.0.0.6 255.255.255.252
+bandwidth 2000
+delay 10
+no sh
+interface s0/0/0
+ip address 10.0.0.13 255.255.255.252
+delay 30000
+no sh
+interface s0/1/1
+ip address 10.0.0.17 255.255.255.252
+bandwidth 10
+delay 1000000
+no sh
+router eigrp 10
+network 10.0.0.4 0.0.0.3
+network 10.0.0.12 0.0.0.3
+network 10.0.0.16 0.0.0.3
+network 128.168.10.0 0.0.0.255
+no auto-summary
+
+ip dhcp pool credito
+network 128.168.10.0 255.255.255.0
+default-router 128.168.10.1 
+ip dhcp excluded-address 128.168.10.0 128.168.10.9
+dns-server 192.168.100.2
+
+COBRANZA
+----------------
+enable
+configure terminal
+hostname COBRANZA
+interface s0/1/1
+ip address 10.0.0.10 255.255.255.252
+bandwidth 2000
+delay 10
+no sh
+interface s0/0/0
+ip address 10.0.0.14 255.255.255.252
+delay 30000
+no sh
+interface s0/1/0
+ip address 10.0.0.21 255.255.255.252
+bandwidth 2000
+delay 10
+no sh
+router eigrp 10
+network 10.0.0.8 0.0.0.3
+network 10.0.0.12 0.0.0.3
+network 10.0.0.20 0.0.0.3
+no auto-summary
+
+CONTABILIDAD
+----------------
+enable
+configure terminal
+hostname CONTABILIDAD
+interface fa0/0
+ip address 128.168.20.1 255.255.255.0
+no sh
+interface s0/1/1
+ip address 10.0.0.18 255.255.255.252
+bandwidth 10
+delay 1000000
+no sh
+interface s0/1/0
+ip address 10.0.0.22 255.255.255.252
+bandwidth 2000
+delay 10
+no sh
+
+router eigrp 10
+network 10.0.0.16 0.0.0.3
+network 10.0.0.20 0.0.0.3
+network 128.168.20.0 0.0.0.255
+no auto-summary
+
+ip dhcp pool contabilidad
+network 128.168.20.0 255.255.255.0
+default-router 128.168.20.1 
+dns-server 192.168.100.2
+ip dhcp excluded-address 128.168.20.0 128.168.20.9
+
+SITE
+----------
+enable
+conf t
+hostname SITE
+interface fastEthernet0/1
+description Hacia router SISTEMAS
+switchport mode access
+interface fastEthernet0/2
+description Servidor DNS
+switchport mode access
+interface fastEthernet0/3
+description Servidor EMAIL
+switchport mode access
+interface fastEthernet0/4
+description Servidor AAA
+switchport mode access
+end
+wr

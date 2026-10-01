@@ -1,0 +1,127 @@
+OFICINA 1
+-------------
+enable
+configure terminal
+hostname Oficina1
+vlan 10
+name oficinaDatos
+vlan 110
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 10
+sw voice vlan 110
+interface gi0/1
+sw mode trunk
+
+OFICINA 2
+-------------
+enable
+configure terminal
+hostname Oficina2
+vlan 20
+name oficinaDatos
+vlan 120
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 20
+sw voice vlan 120
+interface gi0/1
+sw mode trunk
+
+OFICINA 3
+-------------
+enable
+configure terminal
+hostname Oficina3
+vlan 10
+name oficinaDatos
+vlan 110
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 10
+sw voice vlan 110
+interface gi0/1
+sw mode trunk
+
+OFICINA 4
+-------------
+enable
+configure terminal
+hostname Oficina4
+vlan 20
+name oficinaDatos
+vlan 120
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 20
+sw voice vlan 120
+interface gi0/1
+sw mode trunk
+
+OFICINA 5
+-------------
+enable
+configure terminal
+hostname Oficina5
+vlan 30
+name oficinaDatos
+vlan 130
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 30
+sw voice vlan 130
+interface gi0/1
+sw mode trunk
+
+OFICINA 6
+-------------
+enable
+configure terminal
+hostname Oficina6
+vlan 40
+name oficinaDatos
+vlan 140
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 40
+sw voice vlan 140
+interface gi0/1
+sw mode trunk
+
+OFICINA 7
+-------------
+enable
+configure terminal
+hostname Oficina7
+vlan 30
+name oficinaDatos
+vlan 130
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 30
+sw voice vlan 130
+interface gi0/1
+sw mode trunk
+
+OFICINA 8
+-------------
+enable
+configure terminal
+hostname Oficina8
+vlan 40
+name oficinaDatos
+vlan 140
+name oficinaVoz
+interface range fa0/1-20
+sw mode access 
+sw access vlan 40
+sw voice vlan 140
+interface gi0/1
+sw mode trunk
